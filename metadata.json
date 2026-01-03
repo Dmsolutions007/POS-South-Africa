@@ -1,5 +1,9 @@
 {
   "name": "Mzansi-Edge POS",
-  "description": "The Future of Mzansi Retail - A production-ready retail POS system with local storage persistence, Excel export compatibility, and AI-driven business insights.",
-  "requestFramePermissions": []
+  "description": "Enterprise-grade retail Point of Sale system. Designed for high-reliability in South African retail environments with offline-first local storage, PWA support, and Flash VAS integration.",
+  "version": "2.4.0",
+  "author": "Nexus Architecture",
+  "requestFramePermissions": [
+    "camera"
+  ]
 }
