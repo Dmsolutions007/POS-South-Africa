@@ -56,7 +56,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
       <aside className={`bg-slate-900 w-64 flex-shrink-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 absolute md:static h-full z-50`}>
         <div className="flex flex-col h-full">
           <div className="p-6 flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">N</div>
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">M</div>
             <h1 className="text-xl font-bold text-white tracking-tight">{APP_NAME}</h1>
           </div>
           

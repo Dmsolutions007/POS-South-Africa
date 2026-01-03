@@ -1,7 +1,8 @@
 
 import React from 'react';
 
-export const APP_NAME = "Nexus POS";
+export const APP_NAME = "Mzansi-Edge POS";
+export const SLOGAN = "The Future of Mzansi Retail";
 export const DEFAULT_CURRENCY = "ZAR";
 export const CURRENCY_SYMBOL = "R";
 export const TAX_RATE = 0.15; // 15% VAT for South Africa

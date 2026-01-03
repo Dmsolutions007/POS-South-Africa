@@ -2,7 +2,7 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { Sale, SaleItem } from '../types';
-import { CURRENCY_SYMBOL, TAX_RATE } from '../constants';
+import { CURRENCY_SYMBOL, TAX_RATE, APP_NAME } from '../constants';
 
 export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   const doc = new jsPDF({
@@ -14,7 +14,7 @@ export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   let y = 10;
 
   doc.setFontSize(14);
-  doc.text("NEXUS POS RETAIL", 40, y, { align: 'center' });
+  doc.text(APP_NAME.toUpperCase(), 40, y, { align: 'center' });
   y += 6;
   doc.setFontSize(8);
   doc.text("Johannesburg, South Africa", 40, y, { align: 'center' });

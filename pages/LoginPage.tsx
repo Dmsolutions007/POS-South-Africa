@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { ShieldCheck, User as UserIcon, Lock } from 'lucide-react';
-import { APP_NAME } from '../constants';
+import { APP_NAME, SLOGAN } from '../constants';
 
 interface LoginPageProps {
   onLogin: (username: string) => void;
@@ -24,7 +24,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <ShieldCheck className="text-white" size={32} />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">{APP_NAME}</h1>
-          <p className="text-gray-400">Secure Retail POS System</p>
+          <p className="text-gray-400">{SLOGAN}</p>
         </div>
 
         <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-xl">
@@ -69,7 +69,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <div className="mt-8 pt-6 border-t border-slate-800 text-center">
             <p className="text-xs text-gray-500">
-              © {new Date().getFullYear()} Nexus Retail Solutions. 
+              © {new Date().getFullYear()} Mzansi-Edge Retail Solutions. 
               <br />South African Excellence in Retail.
             </p>
           </div>
