@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
@@ -33,7 +32,7 @@ const SidebarLink = ({ to, icon: Icon, label, active, onClick }: { to: string, i
     to={to} 
     onClick={onClick}
     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-      active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+      active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white backdrop-blur-sm'
     }`}
   >
     <Icon size={20} />
@@ -59,7 +58,6 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
 
   const closeSidebar = () => setIsSidebarOpen(false);
 
-  // Map route paths to friendly names
   const getPageTitle = (path: string) => {
     switch (path) {
       case '/dashboard': return 'Overview';
@@ -73,13 +71,14 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
   };
 
   return (
-    <div className="flex h-screen overflow-hidden relative font-sans">
-      {/* Background Layer */}
+    <div className="flex h-screen overflow-hidden relative font-sans text-slate-900">
+      {/* Premium HD Retail Background */}
       <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&q=80&w=2000")' }}
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
+        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=85&w=2400")' }}
       >
-        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"></div>
+        {/* Dynamic Multi-Stage Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/60 to-slate-950/90 backdrop-blur-[2px]"></div>
       </div>
 
       {/* Mobile Sidebar Overlay */}
@@ -90,13 +89,13 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
         ></div>
       )}
 
-      {/* Sidebar */}
-      <aside className={`bg-slate-950/90 backdrop-blur-xl w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-slate-800 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      {/* Sidebar - Deep Glass Design */}
+      <aside className={`bg-slate-950/40 backdrop-blur-3xl w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           <div className="p-6">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
                   <Zap size={24} fill="white" />
                 </div>
                 <div>
@@ -120,17 +119,17 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           </div>
 
           <div className="mt-auto p-6 space-y-4">
-            <div className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800/50 backdrop-blur-md">
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/10 backdrop-blur-xl">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">System Integrity</p>
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 animate-pulse'}`}></div>
+                <p className="text-[10px] font-bold text-slate-300 uppercase">System Status</p>
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-amber-500 animate-pulse'}`}></div>
               </div>
-              <p className="text-[8px] sm:text-xs text-slate-400 font-medium">{isOnline ? 'Cloud sync active.' : 'Offline mode active.'}</p>
+              <p className="text-[10px] text-slate-400 font-medium leading-tight">{isOnline ? 'Synced with cloud.' : 'Local mirror active.'}</p>
             </div>
             
             <button 
               onClick={logout}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-500 transition-all font-bold text-sm"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-all font-bold text-sm"
             >
               <LogOut size={18} />
               <span>Lock Terminal</span>
@@ -139,9 +138,9 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-slate-50/90 backdrop-blur-sm">
-        <header className="bg-white/70 backdrop-blur-md border-b border-slate-200 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
+      {/* Main Content Area - Glassmorphic Surface */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-white/70 backdrop-blur-md">
+        <header className="bg-white/80 backdrop-blur-2xl border-b border-slate-200/50 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
           <div className="flex items-center gap-2 md:gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors">
               <Menu size={20} />
@@ -152,7 +151,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           </div>
           
           <div className="flex items-center gap-2 md:gap-4">
-            <div className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter transition-all ${isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-600 border border-red-100 animate-pulse'}`}>
+            <div className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter transition-all ${isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm' : 'bg-red-50 text-red-600 border border-red-100 animate-pulse'}`}>
               {isOnline ? (
                 <><Wifi size={10} className="hidden sm:inline" /><span>Online</span></>
               ) : (
@@ -167,15 +166,15 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
                 <p className="text-xs font-bold text-slate-900">{state.currentUser?.fullName}</p>
                 <p className="text-[10px] text-slate-400 uppercase font-bold">{state.currentUser?.role}</p>
               </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-100 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-slate-400">
-                <Users size={16} />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white font-bold">
+                {state.currentUser?.fullName.charAt(0)}
               </div>
             </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8">
-          <div className="max-w-7xl mx-auto pb-10">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
+          <div className="max-w-[1600px] mx-auto pb-10">
             <Routes>
               <Route path="/dashboard" element={<Dashboard state={state} />} />
               <Route path="/pos" element={<POS state={state} setState={setState} />} />
@@ -199,16 +198,24 @@ const App = () => {
     saveState(state);
   }, [state]);
 
-  const handleLogin = (username: string) => {
+  const login = (username: string) => {
     const user = authenticate(username);
-    if (user) setState(prev => ({ ...prev, currentUser: user }));
+    if (user) {
+      setState(prev => ({ ...prev, currentUser: user }));
+    }
   };
 
-  if (!state.currentUser) return <LoginPage onLogin={handleLogin} />;
+  const logout = () => {
+    setState(prev => ({ ...prev, currentUser: null }));
+  };
+
+  if (!state.currentUser) {
+    return <LoginPage onLogin={login} />;
+  }
 
   return (
     <Router>
-      <AppLayout state={state} setState={setState} logout={() => setState(p => ({...p, currentUser: null}))} />
+      <AppLayout state={state} setState={setState} logout={logout} />
     </Router>
   );
 };
