@@ -114,7 +114,7 @@ const App = () => {
   const handleLogin = (username: string) => {
     const user = authenticate(username);
     if (user) setState(prev => ({ ...prev, currentUser: user }));
-    else alert("Invalid credentials.");
+    // Validation alert removed as LoginPage handles it locally now
   };
 
   if (!state.currentUser) return <LoginPage onLogin={handleLogin} />;
