@@ -1,13 +1,16 @@
 
-import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit3, Trash2, Download, X, Package, Tag, Barcode } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Plus, Search, Filter, Edit3, Trash2, Download, X, Package, Tag, Barcode, Upload, FileJson, Loader2 } from 'lucide-react';
 import { AppState, Product, UserRole } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
+import * as XLSX from 'xlsx';
 
 const Products = ({ state, setState }: { state: AppState, setState: React.Dispatch<React.SetStateAction<AppState>> }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isAdmin = state.currentUser?.role === UserRole.ADMIN;
 
@@ -43,6 +46,49 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
     setEditingProduct(null);
   };
 
+  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        const importedProducts: Product[] = data.map((item: any, idx: number) => ({
+          id: `P-IMP-${Date.now()}-${idx}`,
+          name: item.Name || item.name || 'Unnamed Product',
+          category: item.Category || item.category || 'Uncategorized',
+          barcode: String(item.Barcode || item.barcode || Math.random().toString().slice(2, 12)),
+          price: parseFloat(item.Price || item.price || 0),
+          costPrice: parseFloat(item['Cost Price'] || item.cost_price || item.cost || 0),
+          stock: parseInt(item.Stock || item.stock || 0),
+          lowStockThreshold: parseInt(item['Low Stock Limit'] || item.low_stock || 5),
+        }));
+
+        if (importedProducts.length > 0) {
+          setState(prev => ({
+            ...prev,
+            products: [...prev.products, ...importedProducts]
+          }));
+          alert(`Successfully imported ${importedProducts.length} products.`);
+        }
+      } catch (error) {
+        console.error("Import Error:", error);
+        alert("Failed to parse CSV. Please ensure the file follows the correct format.");
+      } finally {
+        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
   const deleteProduct = (id: string) => {
     if (!isAdmin) return alert("Only admins can delete products.");
     if (confirm("Are you sure you want to delete this product?")) {
@@ -73,23 +119,40 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
           />
         </div>
         <div className="flex items-center gap-3">
+          <input 
+            type="file" 
+            accept=".csv, .xlsx, .xls" 
+            className="hidden" 
+            ref={fileInputRef} 
+            onChange={handleCSVImport} 
+          />
           {isAdmin && (
-            <button 
-              onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}
-              className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95"
-            >
-              <Plus size={18} />
-              <span className="text-sm">Add Product</span>
-            </button>
+            <>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImporting}
+                className="flex-1 md:flex-none bg-slate-900 text-white px-5 py-3 rounded-xl font-bold flex items-center justify-center space-x-2 hover:bg-slate-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+              >
+                {isImporting ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+                <span className="text-sm">Import CSV</span>
+              </button>
+              <button 
+                onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}
+                className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+              >
+                <Plus size={18} />
+                <span className="text-sm">Add Product</span>
+              </button>
+            </>
           )}
         </div>
       </div>
 
       {/* Desktop View: Table */}
-      <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="hidden lg:block bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+            <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
               <th className="px-6 py-4">Product Info</th>
               <th className="px-6 py-4">Category</th>
               <th className="px-6 py-4 text-right">Selling Price</th>
@@ -99,7 +162,7 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
             {filtered.map(p => (
-              <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+              <tr key={p.id} className="hover:bg-blue-50/30 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
@@ -154,7 +217,7 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
       {/* Mobile/Tablet View: Cards */}
       <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filtered.map(p => (
-          <div key={p.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+          <div key={p.id} className="bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${p.stock <= p.lowStockThreshold ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
@@ -193,7 +256,7 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+        <div className="text-center py-20 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200">
           <Package size={48} className="mx-auto text-slate-200 mb-4" />
           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No matching products found</p>
         </div>

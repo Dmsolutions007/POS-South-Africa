@@ -73,7 +73,15 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden relative">
+    <div className="flex h-screen overflow-hidden relative font-sans">
+      {/* Background Layer */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&q=80&w=2000")' }}
+      >
+        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"></div>
+      </div>
+
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -83,7 +91,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
       )}
 
       {/* Sidebar */}
-      <aside className={`bg-slate-950 w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-slate-900 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`bg-slate-950/90 backdrop-blur-xl w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-slate-800 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           <div className="p-6">
             <div className="flex items-center justify-between mb-8">
@@ -112,7 +120,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           </div>
 
           <div className="mt-auto p-6 space-y-4">
-            <div className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800">
+            <div className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800/50 backdrop-blur-md">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-bold text-slate-500 uppercase">System Integrity</p>
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 animate-pulse'}`}></div>
@@ -132,10 +140,10 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <header className="bg-white/90 backdrop-blur-md border-b h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-slate-50/90 backdrop-blur-sm">
+        <header className="bg-white/70 backdrop-blur-md border-b border-slate-200 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
           <div className="flex items-center gap-2 md:gap-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors">
               <Menu size={20} />
             </button>
             <h2 className="text-[10px] md:text-sm font-bold text-slate-900 uppercase tracking-widest truncate">
