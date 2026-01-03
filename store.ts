@@ -1,7 +1,7 @@
 
-import { AppState, User, Product, Customer, Sale, InventoryLog, UserRole } from './types';
+import { AppState, User, UserRole } from './types';
 
-const STORAGE_KEY = 'nexus_pos_data';
+const STORAGE_KEY = 'nexus_pos_data_v2';
 
 const initialUsers: User[] = [
   { id: '1', username: 'admin', role: UserRole.ADMIN, fullName: 'System Administrator' },
@@ -10,21 +10,19 @@ const initialUsers: User[] = [
 
 const getInitialData = (): AppState => {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    return JSON.parse(saved);
-  }
+  if (saved) return JSON.parse(saved);
+  
   return {
     currentUser: null,
     products: [
       { id: 'p1', name: 'Fresh Milk 2L', category: 'Dairy', barcode: '6001234567890', price: 34.99, costPrice: 28.00, stock: 50, lowStockThreshold: 10 },
       { id: 'p2', name: 'White Bread', category: 'Bakery', barcode: '6000987654321', price: 18.50, costPrice: 14.00, stock: 30, lowStockThreshold: 5 },
-      { id: 'p3', name: 'Coca-Cola 500ml', category: 'Beverages', barcode: '5449000000996', price: 14.00, costPrice: 10.00, stock: 100, lowStockThreshold: 20 },
     ],
-    customers: [
-      { id: 'c1', name: 'John Doe', email: 'john@example.com', phone: '0821234567', loyaltyPoints: 0, totalSpent: 0 }
-    ],
+    customers: [],
     sales: [],
     inventoryLogs: [],
+    flashTransactions: [],
+    flashWalletBalance: 4500.75,
     currency: 'ZAR',
   };
 };
@@ -36,6 +34,5 @@ export const saveState = (state: AppState) => {
 };
 
 export const authenticate = (username: string): User | null => {
-  const user = initialUsers.find(u => u.username === username);
-  return user || null;
+  return initialUsers.find(u => u.username === username) || null;
 };

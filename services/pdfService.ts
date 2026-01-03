@@ -1,19 +1,14 @@
 
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import { Sale, SaleItem } from '../types';
+import { Sale, SaleItem, FlashTransaction } from '../types';
 import { CURRENCY_SYMBOL, TAX_RATE, APP_NAME } from '../constants';
 
 export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
-  const doc = new jsPDF({
-    unit: 'mm',
-    format: [80, 220] // Increased height to accommodate policy
-  });
-
+  const doc = new jsPDF({ unit: 'mm', format: [80, 220] });
   const margin = 5;
   let y = 10;
 
-  // Header - Brand & Address
   doc.setFontSize(14);
   doc.text(APP_NAME.toUpperCase(), 40, y, { align: 'center' });
   y += 6;
@@ -25,7 +20,6 @@ export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   doc.text("Tel: +27 65 845 6336", 40, y, { align: 'center' });
   y += 6;
 
-  // Transaction Info
   doc.text(`Receipt: ${sale.id}`, 5, y);
   y += 4;
   doc.text(`Date: ${new Date(sale.timestamp).toLocaleString()}`, 5, y);
@@ -34,7 +28,6 @@ export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   doc.line(margin, y, 75, y);
   y += 5;
 
-  // Items
   items.forEach(item => {
     doc.text(item.productName.substring(0, 25), 5, y);
     doc.text(`${item.quantity} x ${item.unitPrice.toFixed(2)}`, 5, y + 4);
@@ -45,29 +38,50 @@ export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   doc.line(margin, y, 75, y);
   y += 6;
 
-  // Totals
   doc.setFontSize(10);
   doc.text("TOTAL", 5, y);
   doc.text(`${CURRENCY_SYMBOL}${sale.totalAmount.toFixed(2)}`, 75, y, { align: 'right' });
-  y += 5;
+  y += 15;
+
   doc.setFontSize(8);
-  doc.text(`VAT (15%): ${CURRENCY_SYMBOL}${sale.taxAmount.toFixed(2)}`, 5, y);
+  doc.text("RETURN POLICY: 7 Days with receipt.", 40, y, { align: 'center' });
+  doc.save(`receipt_${sale.id}.pdf`);
+};
+
+export const generateFlashReceipt = (tx: FlashTransaction) => {
+  const doc = new jsPDF({ unit: 'mm', format: [80, 150] });
+  let y = 10;
+
+  doc.setFontSize(14);
+  doc.text("FLASH VAS RECEIPT", 40, y, { align: 'center' });
+  y += 8;
+  doc.setFontSize(10);
+  doc.text(tx.provider.toUpperCase(), 40, y, { align: 'center' });
   y += 10;
 
-  // Footer & Policy
   doc.setFontSize(8);
-  doc.text("RETURN POLICY:", 5, y);
-  y += 4;
-  const policy = "Returns accepted within 7 days with original receipt. Items must be in original packaging. No returns on perishable goods.";
-  const splitPolicy = doc.splitTextToSize(policy, 70);
-  doc.text(splitPolicy, 5, y);
-  y += (splitPolicy.length * 4) + 4;
+  doc.text(`Reference: ${tx.reference}`, 5, y); y += 5;
+  doc.text(`Date: ${new Date(tx.timestamp).toLocaleString()}`, 5, y); y += 5;
+  doc.text(`Customer: ${tx.customerPhone}`, 5, y); y += 10;
 
-  doc.setFontSize(9);
-  doc.text("Thank you for your business!", 40, y, { align: 'center' });
-  y += 4;
-  doc.setFontSize(7);
-  doc.text("Software powered by Mzansi-Edge POS", 40, y, { align: 'center' });
+  doc.line(5, y, 75, y); y += 10;
 
-  doc.save(`receipt_${sale.id}.pdf`);
+  doc.setFontSize(12);
+  doc.text(`${tx.type}: ${CURRENCY_SYMBOL}${tx.amount.toFixed(2)}`, 40, y, { align: 'center' });
+  y += 12;
+
+  if (tx.token) {
+    doc.setFontSize(14);
+    doc.setFont("courier", "bold");
+    doc.text("VOUCHER PIN / TOKEN:", 40, y, { align: 'center' });
+    y += 10;
+    doc.text(tx.token, 40, y, { align: 'center' });
+    y += 10;
+  }
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("Thank you for using Flash!", 40, y + 10, { align: 'center' });
+
+  doc.save(`flash_${tx.reference}.pdf`);
 };

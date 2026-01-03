@@ -22,6 +22,30 @@ export interface Product {
   lowStockThreshold: number;
 }
 
+// FLASH VAS TYPES
+export type FlashProductType = 'AIRTIME' | 'DATA' | 'ELECTRICITY' | 'VOUCHER';
+
+export interface FlashProduct {
+  id: string;
+  type: FlashProductType;
+  provider: string;
+  name: string;
+  amount: number;
+  description?: string;
+}
+
+export interface FlashTransaction {
+  id: string;
+  reference: string;
+  type: FlashProductType;
+  provider: string;
+  amount: number;
+  customerPhone: string;
+  token?: string; // For Electricity or PIN vouchers
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  timestamp: number;
+}
+
 export interface Customer {
   id: string;
   name: string;
@@ -54,7 +78,7 @@ export interface Sale {
 export interface InventoryLog {
   id: string;
   productId: string;
-  change: number; // positive for addition, negative for deduction
+  change: number; 
   reason: string;
   timestamp: number;
   userId: string;
@@ -66,5 +90,7 @@ export interface AppState {
   customers: Customer[];
   sales: Sale[];
   inventoryLogs: InventoryLog[];
+  flashTransactions: FlashTransaction[];
+  flashWalletBalance: number;
   currency: string;
 }
