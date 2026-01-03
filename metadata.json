@@ -1,0 +1,5 @@
+{
+  "name": "Nexus POS - South Africa Edition",
+  "description": "A production-ready retail POS system with local storage persistence, Excel export compatibility, and AI-driven business insights. Designed for high reliability in areas with unstable connectivity.",
+  "requestFramePermissions": []
+}
