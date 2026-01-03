@@ -154,7 +154,7 @@ const POS = ({ state, setState }: { state: AppState, setState: React.Dispatch<Re
       setIsAdminModalOpen(false);
       proceedToFinalPayment();
     } else {
-      setPinError("(you are not allow to complete the sale; contact the admin: +27658456336)");
+      setPinError("(you are not allowed to complete the sale; contact the admin on WhatsApp: +27658456336)");
     }
   };
 
@@ -513,7 +513,7 @@ const POS = ({ state, setState }: { state: AppState, setState: React.Dispatch<Re
                   setIsAdminModalOpen(false);
                   handleFlashSale();
                 } else {
-                  setPinError("(you are not allow to complete the sale; contact the admin: +27658456336)");
+                  setPinError("(you are not allowed to complete the sale; contact the admin on WhatsApp: +27658456336)");
                 }
               } else {
                 handleVerifyAdminPin(e);
@@ -523,6 +523,7 @@ const POS = ({ state, setState }: { state: AppState, setState: React.Dispatch<Re
                 <input 
                   type="password" 
                   value={adminPin}
+                  maxLength={4}
                   onChange={(e) => setAdminPin(e.target.value)}
                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 text-center text-3xl font-black tracking-[1em] focus:border-blue-500 focus:bg-white transition-all outline-none"
                   placeholder="••••"
