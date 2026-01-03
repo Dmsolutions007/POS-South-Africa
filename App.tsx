@@ -59,6 +59,19 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
 
   const closeSidebar = () => setIsSidebarOpen(false);
 
+  // Map route paths to friendly names
+  const getPageTitle = (path: string) => {
+    switch (path) {
+      case '/dashboard': return 'Overview';
+      case '/pos': return 'Point of Sale';
+      case '/vas': return 'VAS / Flash';
+      case '/products': return 'Inventory';
+      case '/customers': return 'Customers';
+      case '/reports': return 'Analytics';
+      default: return 'Overview';
+    }
+  };
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden relative">
       {/* Mobile Sidebar Overlay */}
@@ -90,7 +103,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
             
             <nav className="space-y-1.5">
               <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Overview" active={location.pathname === '/dashboard'} onClick={closeSidebar} />
-              <SidebarLink to="/pos" icon={ShoppingCart} label="Register" active={location.pathname === '/pos'} onClick={closeSidebar} />
+              <SidebarLink to="/pos" icon={ShoppingCart} label="POS" active={location.pathname === '/pos'} onClick={closeSidebar} />
               <SidebarLink to="/vas" icon={Zap} label="VAS / Flash" active={location.pathname === '/vas'} onClick={closeSidebar} />
               <SidebarLink to="/products" icon={Package} label="Inventory" active={location.pathname === '/products'} onClick={closeSidebar} />
               <SidebarLink to="/customers" icon={Users} label="Customers" active={location.pathname === '/customers'} onClick={closeSidebar} />
@@ -126,7 +139,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
               <Menu size={20} />
             </button>
             <h2 className="text-[10px] md:text-sm font-bold text-slate-900 uppercase tracking-widest truncate">
-              {location.pathname.replace('/', '') || 'Overview'}
+              {getPageTitle(location.pathname)}
             </h2>
           </div>
           
