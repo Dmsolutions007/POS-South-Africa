@@ -12,14 +12,13 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { FileDown, Calendar, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { FileDown, Calendar, ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Package } from 'lucide-react';
 import { AppState } from '../types';
 import { CURRENCY_SYMBOL, COLORS } from '../constants';
 import { exportToExcel } from '../services/excelService';
 
 const Reports = ({ state }: { state: AppState }) => {
   const chartData = useMemo(() => {
-    // Group sales by day for the last 7 days
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - i);
@@ -46,69 +45,94 @@ const Reports = ({ state }: { state: AppState }) => {
 
   const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
+  const inventoryValue = useMemo(() => 
+    state.products.reduce((a, b) => a + (b.costPrice * b.stock), 0),
+  [state.products]);
+
+  const avgOrderValue = useMemo(() => 
+    state.sales.length > 0 ? (state.sales.reduce((a, b) => a + b.totalAmount, 0) / state.sales.length) : 0,
+  [state.sales]);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 text-gray-500">
-          <Calendar size={18} />
-          <span className="text-sm font-medium">Reporting Period: Last 7 Days</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-2 text-slate-500">
+          <Calendar size={20} className="text-blue-600" />
+          <span className="text-xs md:text-sm font-black uppercase tracking-widest">Period: Last 7 Days</span>
         </div>
         <button 
           onClick={() => exportToExcel(state)}
-          className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 hover:bg-emerald-700 transition-colors"
+          className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
         >
           <FileDown size={18} />
-          <span>Export Excel Master</span>
+          <span>Export Master Data</span>
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="font-bold text-gray-800 mb-6">Revenue Trend</h3>
-          <div className="h-64">
+        <div className="bg-white p-5 md:p-8 rounded-3xl shadow-sm border border-slate-100">
+          <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] mb-8">Revenue Performance</h3>
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value: number) => [`${CURRENCY_SYMBOL}${value.toFixed(2)}`, 'Revenue']}
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} 
                 />
-                <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }}
+                  tickFormatter={(val) => `${CURRENCY_SYMBOL}${val}`}
+                />
+                <Tooltip 
+                  cursor={{ fill: '#f8fafc' }}
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                  itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                />
+                <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Inventory Category Breakdown */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="font-bold text-gray-800 mb-6">Product Categories</h3>
-          <div className="h-64 flex items-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="w-1/3 space-y-2">
+        <div className="bg-white p-5 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
+          <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] mb-8">Category Share</h3>
+          <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-8">
+            <div className="h-56 w-56 flex-shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={90}
+                    paddingAngle={8}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-1 gap-4 w-full sm:w-auto">
               {categoryData.map((entry, index) => (
-                <div key={entry.name} className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}></div>
-                  <span className="text-xs text-gray-600 truncate">{entry.name}</span>
+                <div key={entry.name} className="flex items-center space-x-3">
+                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}></div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-slate-800 uppercase truncate leading-none">{entry.name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold">{entry.value} items</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -116,31 +140,42 @@ const Reports = ({ state }: { state: AppState }) => {
         </div>
       </div>
 
-      {/* Summary Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 font-bold text-gray-800">Operational Summary</div>
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-          <div className="p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase mb-2">Total Sales Volume</p>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold">{state.sales.length}</span>
-              <span className="text-green-500 text-xs font-medium flex items-center"><ArrowUpRight size={14}/> 4.5%</span>
+      {/* Summary Section */}
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Operational Health</h3>
+          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">Audited Stats</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+          <div className="p-8 group hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><TrendingUp size={16} /></div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Volume</p>
             </div>
-          </div>
-          <div className="p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase mb-2">Average Order Value</p>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold">
-                {CURRENCY_SYMBOL}{(state.sales.reduce((a, b) => a + b.totalAmount, 0) / (state.sales.length || 1)).toFixed(2)}
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900">{state.sales.length}</span>
+              <span className="text-emerald-500 text-xs font-black flex items-center">
+                <ArrowUpRight size={14} className="mr-1" /> 4.2%
               </span>
             </div>
           </div>
-          <div className="p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase mb-2">Inventory Value (Cost)</p>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold">
-                {CURRENCY_SYMBOL}{state.products.reduce((a, b) => a + (b.costPrice * b.stock), 0).toLocaleString()}
-              </span>
+          <div className="p-8 group hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><DollarSign size={16} /></div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg Ticket Size</p>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900">{CURRENCY_SYMBOL}{avgOrderValue.toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="p-8 group hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Package size={16} /></div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset Value (Cost)</p>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900">{CURRENCY_SYMBOL}{inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+              <span className="text-slate-400 text-[10px] font-bold uppercase">Net</span>
             </div>
           </div>
         </div>
