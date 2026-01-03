@@ -531,9 +531,20 @@ const POS = ({ state, setState }: { state: AppState, setState: React.Dispatch<Re
                   required
                 />
                 {pinError && (
-                  <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex gap-3 text-red-600 animate-in fade-in slide-in-from-top-2">
-                    <ShieldAlert size={20} className="shrink-0" />
-                    <p className="text-[10px] font-black uppercase leading-relaxed text-left">{pinError}</p>
+                  <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex flex-col gap-3 text-red-600 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex gap-3">
+                      <ShieldAlert size={20} className="shrink-0" />
+                      <p className="text-[10px] font-black uppercase leading-relaxed text-left">{pinError}</p>
+                    </div>
+                    <a 
+                      href="https://wa.me/27658456336" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-full bg-emerald-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98]"
+                    >
+                      <Smartphone size={16} />
+                      WhatsApp Admin
+                    </a>
                   </div>
                 )}
               </div>
