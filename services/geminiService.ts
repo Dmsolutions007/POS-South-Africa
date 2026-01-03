@@ -1,12 +1,18 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { Product, Sale } from "../types";
-
-// Always use the required initialization format and direct process.env.API_KEY access
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+import { CONFIG, hasGeminiKey } from "./config";
 
 export const getBusinessInsights = async (products: Product[], sales: Sale[]) => {
+  // Graceful exit if hosting environment lacks the API key
+  if (!hasGeminiKey) {
+    console.warn("Gemini AI: API key is not configured in this environment.");
+    return "AI Insights are currently unavailable (Missing API Key).";
+  }
+
   try {
+    const ai = new GoogleGenAI({ apiKey: CONFIG.API.GEMINI_KEY });
+    
     const dataSummary = {
       totalProducts: products.length,
       lowStockCount: products.filter(p => p.stock <= p.lowStockThreshold).length,
@@ -19,16 +25,14 @@ export const getBusinessInsights = async (products: Product[], sales: Sale[]) =>
     Data: ${JSON.stringify(dataSummary)}
     Return the response as a simple list.`;
 
-    // Use ai.models.generateContent directly with the model and prompt
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
 
-    // Access .text property directly
-    return response.text || "No insights found.";
+    return response.text || "No insights found for the current data set.";
   } catch (error) {
-    console.error("Gemini Error:", error);
-    return "Error generating insights.";
+    console.error("Gemini Hosting Error:", error);
+    return "The intelligence engine is currently warming up. Please check back shortly.";
   }
 };

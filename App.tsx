@@ -12,12 +12,11 @@ import {
   Bell,
   Zap,
   Wifi,
-  WifiOff,
-  CloudCheck
+  WifiOff
 } from 'lucide-react';
 import { loadState, saveState, authenticate } from './store';
 import { AppState } from './types';
-import { APP_NAME } from './constants';
+import { CONFIG } from './services/config';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -58,7 +57,6 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Sidebar */}
       <aside className={`bg-slate-950 w-64 flex-shrink-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 absolute md:static h-full z-50 border-r border-slate-900`}>
         <div className="flex flex-col h-full">
           <div className="p-6">
@@ -68,7 +66,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
               </div>
               <div>
                 <h1 className="text-lg font-black text-white tracking-tight leading-none">Mzansi-Edge</h1>
-                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Enterprise POS</span>
+                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">v{CONFIG.APP.VERSION}</span>
               </div>
             </div>
             
@@ -85,10 +83,10 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           <div className="mt-auto p-6 space-y-4">
             <div className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">Local Database</p>
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase">System Integrity</p>
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`}></div>
               </div>
-              <p className="text-xs text-slate-400 font-medium">Auto-sync active. {state.sales.length} records mirrored.</p>
+              <p className="text-xs text-slate-400 font-medium">{isOnline ? 'Cloud sync active.' : 'Local-first enabled.'}</p>
             </div>
             
             <button 
@@ -108,20 +106,17 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-600">
               <Menu size={20} />
             </button>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest">
-                {location.pathname.replace('/', '') || 'Overview'}
-              </h2>
-            </div>
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest">
+              {location.pathname.replace('/', '') || 'Overview'}
+            </h2>
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Hosting Environment Status */}
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all ${isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-600 border border-red-100 animate-pulse'}`}>
               {isOnline ? (
                 <><Wifi size={12} /><span>Cloud Connected</span></>
               ) : (
-                <><WifiOff size={12} /><span>Offline Mode</span></>
+                <><WifiOff size={12} /><span>Local Mode</span></>
               )}
             </div>
             

@@ -1,7 +1,6 @@
 
 import { AppState, User, UserRole } from './types';
-
-const STORAGE_KEY = 'nexus_pos_data_v2';
+import { CONFIG } from './services/config';
 
 const initialUsers: User[] = [
   { id: '1', username: 'admin', role: UserRole.ADMIN, fullName: 'System Administrator' },
@@ -9,8 +8,12 @@ const initialUsers: User[] = [
 ];
 
 const getInitialData = (): AppState => {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) return JSON.parse(saved);
+  try {
+    const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.MAIN_STATE);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.error("Storage Initialization Error:", e);
+  }
   
   return {
     currentUser: null,
@@ -23,14 +26,19 @@ const getInitialData = (): AppState => {
     inventoryLogs: [],
     flashTransactions: [],
     flashWalletBalance: 4500.75,
-    currency: 'ZAR',
+    currency: CONFIG.BUSINESS.CURRENCY,
   };
 };
 
 export const loadState = (): AppState => getInitialData();
 
 export const saveState = (state: AppState) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(CONFIG.STORAGE_KEYS.MAIN_STATE, JSON.stringify(state));
+  } catch (e) {
+    console.error("State Persistance Error:", e);
+    // In production hosting, we could trigger a cloud backup here if localStorage fails
+  }
 };
 
 export const authenticate = (username: string): User | null => {
