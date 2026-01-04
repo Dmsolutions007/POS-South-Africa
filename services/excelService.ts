@@ -1,6 +1,5 @@
-
 import * as XLSX from 'xlsx';
-import { AppState } from '../types';
+import { AppState } from '../types.ts';
 
 export const exportToExcel = (state: AppState) => {
   const wb = XLSX.utils.book_new();

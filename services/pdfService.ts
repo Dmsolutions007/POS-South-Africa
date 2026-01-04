@@ -1,8 +1,7 @@
-
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import { Sale, SaleItem, FlashTransaction } from '../types';
-import { CURRENCY_SYMBOL, TAX_RATE, APP_NAME } from '../constants';
+import { Sale, SaleItem, FlashTransaction } from '../types.ts';
+import { CURRENCY_SYMBOL, TAX_RATE, APP_NAME } from '../constants.tsx';
 
 export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   const doc = new jsPDF({ unit: 'mm', format: [80, 220] });

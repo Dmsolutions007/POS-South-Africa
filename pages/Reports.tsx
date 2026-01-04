@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { 
   BarChart, 
@@ -13,9 +12,9 @@ import {
   Cell
 } from 'recharts';
 import { FileDown, Calendar, ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Package } from 'lucide-react';
-import { AppState } from '../types';
-import { CURRENCY_SYMBOL, COLORS } from '../constants';
-import { exportToExcel } from '../services/excelService';
+import { AppState } from '../types.ts';
+import { CURRENCY_SYMBOL, COLORS } from '../constants.tsx';
+import { exportToExcel } from '../services/excelService.ts';
 
 const Reports = ({ state }: { state: AppState }) => {
   const chartData = useMemo(() => {
@@ -70,7 +69,6 @@ const Reports = ({ state }: { state: AppState }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
         <div className="bg-white p-5 md:p-8 rounded-3xl shadow-sm border border-slate-100">
           <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] mb-8">Revenue Performance</h3>
           <div className="h-72">
@@ -100,7 +98,6 @@ const Reports = ({ state }: { state: AppState }) => {
           </div>
         </div>
 
-        {/* Inventory Category Breakdown */}
         <div className="bg-white p-5 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
           <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] mb-8">Category Share</h3>
           <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-8">
@@ -140,7 +137,6 @@ const Reports = ({ state }: { state: AppState }) => {
         </div>
       </div>
 
-      {/* Summary Section */}
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Operational Health</h3>

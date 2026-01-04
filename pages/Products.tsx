@@ -1,8 +1,7 @@
-
 import React, { useState, useRef } from 'react';
 import { Plus, Search, Filter, Edit3, Trash2, Download, X, Package, Tag, Barcode, Upload, FileJson, Loader2 } from 'lucide-react';
-import { AppState, Product, UserRole } from '../types';
-import { CURRENCY_SYMBOL } from '../constants';
+import { AppState, Product, UserRole } from '../types.ts';
+import { CURRENCY_SYMBOL } from '../constants.tsx';
 import * as XLSX from 'xlsx';
 
 const Products = ({ state, setState }: { state: AppState, setState: React.Dispatch<React.SetStateAction<AppState>> }) => {
@@ -148,7 +147,6 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
         </div>
       </div>
 
-      {/* Desktop View: Table */}
       <div className="hidden lg:block bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <table className="w-full text-left">
           <thead>
@@ -214,7 +212,6 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
         </table>
       </div>
 
-      {/* Mobile/Tablet View: Cards */}
       <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filtered.map(p => (
           <div key={p.id} className="bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
@@ -262,7 +259,6 @@ const Products = ({ state, setState }: { state: AppState, setState: React.Dispat
         </div>
       )}
 
-      {/* Product Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in slide-in-from-bottom-10 duration-300">

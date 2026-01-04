@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, User, Phone, Mail, Award, X } from 'lucide-react';
-import { AppState, Customer } from '../types';
-import { CURRENCY_SYMBOL } from '../constants';
+import { AppState, Customer } from '../types.ts';
+import { CURRENCY_SYMBOL } from '../constants.tsx';
 
 const Customers = ({ state, setState }: { state: AppState, setState: React.Dispatch<React.SetStateAction<AppState>> }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
