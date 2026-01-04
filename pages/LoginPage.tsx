@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ShieldCheck, User as UserIcon, Lock, AlertCircle, Loader2, Zap } from 'lucide-react';
-import { APP_NAME, SLOGAN } from '../constants';
-import { authenticate } from '../store';
-import { CONFIG } from '../services/config';
+import { APP_NAME, SLOGAN } from '../constants.tsx';
+import { authenticate } from '../store.ts';
+import { CONFIG } from '../services/config.ts';
 
 interface LoginPageProps {
   onLogin: (username: string) => void;

@@ -1,6 +1,5 @@
-
-import { FlashTransaction, FlashProductType } from '../types';
-import { CONFIG } from './config';
+import { FlashTransaction, FlashProductType } from '../types.ts';
+import { CONFIG } from './config.ts';
 
 /**
  * Production-ready Flash API Integration Service

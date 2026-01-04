@@ -2,17 +2,6 @@
  * Application Configuration Manager
  */
 
-const getSafeEnv = (key: string): string => {
-  try {
-    // @ts-ignore
-    if (window.process?.env?.[key]) return window.process.env[key];
-    if (typeof process !== 'undefined' && process.env && process.env[key]) {
-      return process.env[key];
-    }
-  } catch (e) {}
-  return "";
-};
-
 const getBasePath = () => {
   const path = window.location.pathname;
   return path.substring(0, path.lastIndexOf('/') + 1);
@@ -26,7 +15,8 @@ export const CONFIG = {
     BASE_URL: window.location.origin + getBasePath(),
   },
   API: {
-    GEMINI_KEY: getSafeEnv('API_KEY'),
+    // Strictly using process.env.API_KEY as per the guidelines.
+    GEMINI_KEY: process.env.API_KEY || "",
     FLASH_BASE_URL: "https://api.flash.co.za/v1",
     FLASH_MERCHANT_ID: "27111450216",
   },

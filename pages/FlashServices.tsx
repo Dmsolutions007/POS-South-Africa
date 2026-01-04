@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Zap, 
@@ -18,10 +17,10 @@ import {
   WifiOff,
   Clock
 } from 'lucide-react';
-import { AppState, FlashProductType, FlashTransaction } from '../types';
-import { FLASH_PROVIDERS, CURRENCY_SYMBOL } from '../constants';
-import { FlashService } from '../services/flashService';
-import { generateFlashReceipt } from '../services/pdfService';
+import { AppState, FlashProductType, FlashTransaction } from '../types.ts';
+import { FLASH_PROVIDERS, CURRENCY_SYMBOL } from '../constants.tsx';
+import { FlashService } from '../services/flashService.ts';
+import { generateFlashReceipt } from '../services/pdfService.ts';
 
 const FlashServices = ({ state, setState }: { state: AppState, setState: React.Dispatch<any> }) => {
   const [activeTab, setActiveTab] = useState<FlashProductType>('AIRTIME');
