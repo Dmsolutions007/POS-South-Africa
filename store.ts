@@ -1,6 +1,5 @@
-
-import { AppState, User, UserRole } from './types';
-import { CONFIG } from './services/config';
+import { AppState, User, UserRole } from './types.ts';
+import { CONFIG } from './services/config.ts';
 
 const initialUsers: User[] = [
   { id: '1', username: 'admin', role: UserRole.ADMIN, fullName: 'System Administrator' },

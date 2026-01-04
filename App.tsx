@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
@@ -16,19 +15,19 @@ import {
   Database,
   Printer
 } from 'lucide-react';
-import { loadState, saveState, authenticate } from './store';
-import { AppState } from './types';
-import { CONFIG } from './services/config';
-import { generateReceiptPDF, generateFlashReceipt } from './services/pdfService';
+import { loadState, saveState, authenticate } from './store.ts';
+import { AppState } from './types.ts';
+import { CONFIG } from './services/config.ts';
+import { generateReceiptPDF, generateFlashReceipt } from './services/pdfService.ts';
 
 // Pages
-import Dashboard from './pages/Dashboard';
-import POS from './pages/POS';
-import Products from './pages/Products';
-import Customers from './pages/Customers';
-import Reports from './pages/Reports';
-import LoginPage from './pages/LoginPage';
-import FlashServices from './pages/FlashServices';
+import Dashboard from './pages/Dashboard.tsx';
+import POS from './pages/POS.tsx';
+import Products from './pages/Products.tsx';
+import Customers from './pages/Customers.tsx';
+import Reports from './pages/Reports.tsx';
+import LoginPage from './pages/LoginPage.tsx';
+import FlashServices from './pages/FlashServices.tsx';
 
 const SidebarLink = ({ to, icon: Icon, label, active, onClick }: { to: string, icon: any, label: string, active: boolean, onClick?: () => void }) => (
   <Link 
@@ -136,7 +135,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10 backdrop-blur-xl">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-bold text-slate-300 uppercase">System Status</p>
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-amber-500 animate-pulse'}`}></div>
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-50 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-amber-500 animate-pulse'}`}></div>
               </div>
               <p className="text-[10px] text-slate-400 font-medium leading-tight">{isOnline ? 'Synced with cloud.' : 'Local mirror active.'}</p>
             </div>

@@ -4,27 +4,26 @@
 
 const getSafeEnv = (key: string): string => {
   try {
-    // Priority 1: Direct window polyfill
     // @ts-ignore
     if (window.process?.env?.[key]) return window.process.env[key];
-    
-    // Priority 2: Standard process global
     if (typeof process !== 'undefined' && process.env && process.env[key]) {
       return process.env[key];
     }
-  } catch (e) {
-    // Silence errors
-  }
+  } catch (e) {}
   return "";
+};
+
+const getBasePath = () => {
+  const path = window.location.pathname;
+  return path.substring(0, path.lastIndexOf('/') + 1);
 };
 
 export const CONFIG = {
   APP: {
     NAME: "Mzansi-Edge POS",
-    VERSION: "2.4.4",
-    // Detect GitHub Pages or Netlify environment
-    IS_SUBFOLDER: window.location.pathname.length > 1,
-    BASE_URL: window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1),
+    VERSION: "2.4.5",
+    BASE_PATH: getBasePath(),
+    BASE_URL: window.location.origin + getBasePath(),
   },
   API: {
     GEMINI_KEY: getSafeEnv('API_KEY'),

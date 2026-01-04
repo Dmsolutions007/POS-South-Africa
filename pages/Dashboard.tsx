@@ -1,9 +1,8 @@
-
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { TrendingUp, Package, Users, DollarSign, AlertTriangle, Sparkles } from 'lucide-react';
-import { AppState } from '../types';
-import { CURRENCY_SYMBOL } from '../constants';
-import { getBusinessInsights } from '../services/geminiService';
+import { AppState } from '../types.ts';
+import { CURRENCY_SYMBOL } from '../constants.tsx';
+import { getBusinessInsights } from '../services/geminiService.ts';
 
 const StatCard = ({ icon: Icon, label, value, color, trend }: any) => (
   <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 group hover:border-blue-200 transition-all">
@@ -45,7 +44,6 @@ const Dashboard = ({ state }: { state: AppState }) => {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Dynamic Responsive Grid for Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard 
           icon={DollarSign} 
@@ -76,7 +74,6 @@ const Dashboard = ({ state }: { state: AppState }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity with Responsive Table */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <div className="p-5 md:p-6 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Recent Sales</h3>
@@ -116,7 +113,6 @@ const Dashboard = ({ state }: { state: AppState }) => {
           </div>
         </div>
 
-        {/* Intelligence & Alerts */}
         <div className="space-y-6">
           <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-3xl shadow-xl p-6 text-white relative overflow-hidden group">
             <Sparkles className="absolute -right-6 -bottom-6 opacity-10 transition-transform group-hover:scale-125 duration-700" size={150} />
@@ -126,13 +122,6 @@ const Dashboard = ({ state }: { state: AppState }) => {
             </div>
             <div className="text-xs font-medium text-slate-200 leading-relaxed whitespace-pre-line relative z-10 min-h-[120px]">
               {insights}
-            </div>
-            <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center relative z-10">
-               <span className="text-[8px] font-bold text-blue-300 uppercase">Analysis: Realtime</span>
-               <div className="flex gap-1">
-                 <div className="w-1 h-1 rounded-full bg-blue-400 animate-ping"></div>
-                 <div className="w-1 h-1 rounded-full bg-blue-400"></div>
-               </div>
             </div>
           </div>
 
@@ -156,11 +145,6 @@ const Dashboard = ({ state }: { state: AppState }) => {
                   <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded uppercase">{p.stock} LEFT</span>
                 </div>
               ))}
-              {stats.lowStock === 0 && (
-                <div className="text-center py-6">
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Inventory Levels Optimal</p>
-                </div>
-              )}
             </div>
           </div>
         </div>

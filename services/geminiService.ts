@@ -1,7 +1,6 @@
-
 import { GoogleGenAI } from "@google/genai";
-import { Product, Sale } from "../types";
-import { CONFIG, hasGeminiKey } from "./config";
+import { Product, Sale } from "../types.ts";
+import { CONFIG, hasGeminiKey } from "./config.ts";
 
 export const getBusinessInsights = async (products: Product[], sales: Sale[]) => {
   // Graceful exit if hosting environment lacks the API key
