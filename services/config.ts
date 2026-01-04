@@ -4,6 +4,16 @@
  * Handles environment-specific settings and business constants.
  */
 
+// Defensive helper to avoid ReferenceError: process is not defined
+const getEnv = (key: string): string => {
+  try {
+    // @ts-ignore
+    return (typeof process !== 'undefined' && process.env && process.env[key]) || "";
+  } catch (e) {
+    return "";
+  }
+};
+
 export const CONFIG = {
   APP: {
     NAME: "Mzansi-Edge POS",
@@ -11,9 +21,8 @@ export const CONFIG = {
     ENVIRONMENT: window.location.hostname === 'localhost' ? 'development' : 'production',
   },
   API: {
-    // The Google GenAI key is strictly accessed from the environment
-    GEMINI_KEY: process.env.API_KEY || "",
-    // In a real hosting environment, these would be process.env.FLASH_ENDPOINT
+    // Safely access the key
+    GEMINI_KEY: getEnv('API_KEY'),
     FLASH_BASE_URL: "https://api.flash.co.za/v1", // Mock placeholder
     FLASH_MERCHANT_ID: "27111450216",
   },

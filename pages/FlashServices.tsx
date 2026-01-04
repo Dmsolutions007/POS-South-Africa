@@ -14,7 +14,9 @@ import {
   User,
   History,
   LayoutGrid,
-  Coins
+  Coins,
+  WifiOff,
+  Clock
 } from 'lucide-react';
 import { AppState, FlashProductType, FlashTransaction } from '../types';
 import { FLASH_PROVIDERS, CURRENCY_SYMBOL } from '../constants';
@@ -29,6 +31,8 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
   const [cashReceived, setCashReceived] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastTx, setLastTx] = useState<FlashTransaction | null>(null);
+  const [isOfflineTx, setIsOfflineTx] = useState(false);
+  const [isQueued, setIsQueued] = useState(false);
 
   useEffect(() => {
     FlashService.checkBalance().then(bal => {
@@ -52,9 +56,11 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
       const vAmount = parseFloat(amount);
       const vCash = parseFloat(cashReceived) || vAmount;
       const vChange = Math.max(0, vCash - vAmount);
+      const isOffline = !navigator.onLine;
 
+      const txId = `TX-${Date.now()}`;
       const newTx: FlashTransaction = {
-        id: `TX-${Date.now()}`,
+        id: txId,
         reference: result.ref,
         type: activeTab,
         provider: selectedProvider,
@@ -67,10 +73,14 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
         changeDue: vChange
       };
 
+      setIsOfflineTx(isOffline);
+      setIsQueued(isOffline);
+
       setState((prev: any) => ({
         ...prev,
         flashTransactions: [...prev.flashTransactions, newTx],
-        flashWalletBalance: prev.flashWalletBalance - vAmount
+        flashWalletBalance: prev.flashWalletBalance - vAmount,
+        queuedReceipts: isOffline ? [...prev.queuedReceipts, { type: 'FLASH', id: txId }] : prev.queuedReceipts
       }));
       setLastTx(newTx);
       setAmount("");
@@ -80,6 +90,26 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
       alert(result.error);
     }
     setIsProcessing(false);
+  };
+
+  const toggleReceiptQueue = () => {
+    if (!lastTx) return;
+    
+    const currentlyQueued = state.queuedReceipts.some(q => q.id === lastTx.id);
+    
+    if (currentlyQueued) {
+       setState((prev: any) => ({
+         ...prev,
+         queuedReceipts: prev.queuedReceipts.filter((q: any) => q.id !== lastTx.id)
+       }));
+       setIsQueued(false);
+    } else {
+      setState((prev: any) => ({
+        ...prev,
+        queuedReceipts: [...prev.queuedReceipts, { type: 'FLASH', id: lastTx.id }]
+      }));
+      setIsQueued(true);
+    }
   };
 
   return (
@@ -292,8 +322,20 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
               <CheckCircle2 size={48} strokeWidth={3} />
             </div>
             <h3 className="text-3xl font-black text-slate-900 mb-2 uppercase tracking-tighter leading-none">Voucher Ready</h3>
-            <p className="text-slate-500 text-sm font-medium mb-8">Transaction completed successfully.</p>
+            <p className="text-slate-500 text-sm font-medium mb-4">Transaction completed successfully.</p>
             
+            {isOfflineTx && (
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-6 flex items-center gap-3">
+                <div className="p-2 bg-amber-500 text-white rounded-lg">
+                  <WifiOff size={16} />
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-black text-amber-700 uppercase tracking-widest leading-none mb-1">Queue for Sync</p>
+                  <p className="text-[8px] font-bold text-amber-600 uppercase leading-tight">Receipt will print when online.</p>
+                </div>
+              </div>
+            )}
+
             {lastTx.token && (
               <div className="bg-slate-950 p-6 rounded-3xl mb-8 border border-slate-800 shadow-inner group">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Voucher PIN / Token</p>
@@ -309,8 +351,19 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
                 className="w-full flex items-center justify-center space-x-3 bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/30"
               >
                 <Printer size={20} />
-                <span>Print Voucher</span>
+                <span>Print Voucher Now</span>
               </button>
+
+              {!navigator.onLine && (
+                <button 
+                  onClick={toggleReceiptQueue}
+                  className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isQueued ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}
+                >
+                  <Clock size={18} />
+                  <span>{isQueued ? 'Voucher in Queue' : 'Queue for Printing'}</span>
+                </button>
+              )}
+
               <button 
                 onClick={() => setLastTx(null)}
                 className="w-full text-slate-400 font-black py-4 hover:bg-slate-50 rounded-2xl transition-all text-[10px] uppercase tracking-widest"

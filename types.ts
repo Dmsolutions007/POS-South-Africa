@@ -34,6 +34,11 @@ export interface FlashProduct {
   description?: string;
 }
 
+export interface QueuedReceipt {
+  type: 'RETAIL' | 'FLASH';
+  id: string;
+}
+
 export interface FlashTransaction {
   id: string;
   reference: string;
@@ -97,4 +102,5 @@ export interface AppState {
   flashTransactions: FlashTransaction[];
   flashWalletBalance: number;
   currency: string;
+  queuedReceipts: QueuedReceipt[];
 }

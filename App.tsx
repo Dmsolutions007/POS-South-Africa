@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
@@ -12,11 +13,14 @@ import {
   Bell,
   Zap,
   Wifi,
-  WifiOff
+  WifiOff,
+  Database,
+  Printer
 } from 'lucide-react';
 import { loadState, saveState, authenticate } from './store';
 import { AppState } from './types';
 import { CONFIG } from './services/config';
+import { generateReceiptPDF, generateFlashReceipt } from './services/pdfService';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -56,6 +60,26 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
     };
   }, []);
 
+  // Sync Logic: Auto-print queued receipts when online
+  useEffect(() => {
+    if (isOnline && state.queuedReceipts.length > 0) {
+      console.log(`System Online: Printing ${state.queuedReceipts.length} queued receipts...`);
+      
+      state.queuedReceipts.forEach(queued => {
+        if (queued.type === 'RETAIL') {
+          const sale = state.sales.find(s => s.id === queued.id);
+          if (sale) generateReceiptPDF(sale, sale.items);
+        } else {
+          const tx = state.flashTransactions.find(t => t.id === queued.id);
+          if (tx) generateFlashReceipt(tx);
+        }
+      });
+
+      // Clear the queue after processing
+      setState(prev => ({ ...prev, queuedReceipts: [] }));
+    }
+  }, [isOnline, state.queuedReceipts, state.sales, state.flashTransactions, setState]);
+
   const closeSidebar = () => setIsSidebarOpen(false);
 
   const getPageTitle = (path: string) => {
@@ -71,7 +95,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
   };
 
   return (
-    <div className="flex h-screen overflow-hidden relative font-sans text-slate-900">
+    <div className="flex h-full w-full overflow-hidden relative font-sans text-slate-900 bg-slate-950">
       {/* Premium HD Retail Background */}
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
@@ -108,7 +132,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
               </button>
             </div>
             
-            <nav className="space-y-1.5">
+            <nav className="space-y-1.5 overflow-y-auto no-scrollbar max-h-[calc(100dvh-200px)]">
               <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Overview" active={location.pathname === '/dashboard'} onClick={closeSidebar} />
               <SidebarLink to="/pos" icon={ShoppingCart} label="POS" active={location.pathname === '/pos'} onClick={closeSidebar} />
               <SidebarLink to="/vas" icon={Zap} label="VAS / Flash" active={location.pathname === '/vas'} onClick={closeSidebar} />
@@ -139,7 +163,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
       </aside>
 
       {/* Main Content Area - Glassmorphic Surface */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-white/70 backdrop-blur-md">
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative z-10 bg-white/70 backdrop-blur-md">
         <header className="bg-white/80 backdrop-blur-2xl border-b border-slate-200/50 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
           <div className="flex items-center gap-2 md:gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors">
@@ -151,6 +175,13 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           </div>
           
           <div className="flex items-center gap-2 md:gap-4">
+            {state.queuedReceipts.length > 0 && (
+               <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 animate-bounce">
+                 <Printer size={12} />
+                 <span className="text-[9px] font-black uppercase tracking-widest">{state.queuedReceipts.length} Queued</span>
+               </div>
+            )}
+
             <div className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter transition-all ${isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm' : 'bg-red-50 text-red-600 border border-red-100 animate-pulse'}`}>
               {isOnline ? (
                 <><Wifi size={10} className="hidden sm:inline" /><span>Online</span></>
@@ -173,7 +204,17 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
+        {/* Offline Warning Banner */}
+        {!isOnline && (
+          <div className="bg-amber-500 text-white px-6 py-2.5 flex items-center justify-center gap-4 animate-in slide-in-from-top duration-300 flex-shrink-0">
+            <Database size={16} className="animate-pulse" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-center">
+              Register Offline: Local Data mirroring active.
+            </p>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 touch-pan-y">
           <div className="max-w-[1600px] mx-auto pb-10">
             <Routes>
               <Route path="/dashboard" element={<Dashboard state={state} />} />
