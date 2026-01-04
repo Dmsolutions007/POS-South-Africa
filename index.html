@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mzansi-Edge POS</title>
     
-    <!-- 1. CRITICAL: Initialize process global before ANY other scripts load -->
+    <!-- 1. CRITICAL: Initialize process global immediately -->
     <script>
-      window.process = { env: { API_KEY: "" } };
+      (function() {
+        window.process = { env: { API_KEY: "" } };
+        // Detect if we are in a subfolder (GitHub Pages)
+        const path = window.location.pathname;
+        window.__BASE_PATH__ = path.substring(0, path.lastIndexOf('/') + 1);
+      })();
     </script>
 
-    <!-- 2. Mobile Compatibility: Polyfill for Import Maps (iOS < 16.4 / Older Android) -->
+    <!-- 2. Polyfill for older mobile browsers -->
     <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
     <script type="importmap">
@@ -42,41 +47,49 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background: #020617; /* Slate-950 */
+            background: #020617; /* Slate-950 - This is your blue/black color */
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             overflow: hidden;
-            /* Prevents pull-to-refresh and elastic bounce on mobile */
             overscroll-behavior: none;
         }
         #root {
             height: 100%;
-            height: 100vh; /* Fallback */
             height: 100dvh;
             display: flex;
             flex-direction: column;
         }
-        @media print {
-            .no-print { display: none !important; }
+        /* Fallback loader in case JS fails */
+        #root:empty::before {
+            content: "Initializing POS System...";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #3b82f6;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 10px;
         }
     </style>
 </head>
 <body class="select-none">
     <div id="root"></div>
     
-    <!-- 3. Explicitly load the entry point as a module -->
-    <script type="module" src="index.tsx"></script>
+    <!-- Use relative pathing for the entry point -->
+    <script type="module" src="./index.tsx"></script>
 
     <script>
-      // Graceful error reporting for mobile debugging
       window.addEventListener('error', function(e) {
-        console.error('POS System Error:', e.message, 'at', e.filename, ':', e.lineno);
+        console.error('Runtime Error:', e.message);
+        // Optional: Show error on screen for mobile debugging
+        // document.getElementById('root').innerText = "Load Error: " + e.message;
       });
       
-      // Relative service worker registration
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js').catch(() => {});
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
       }
     </script>
