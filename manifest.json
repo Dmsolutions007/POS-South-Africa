@@ -3,7 +3,7 @@
   "name": "Mzansi-Edge POS",
   "short_name": "MzansiPOS",
   "description": "Production-ready Retail POS for Mzansi Businesses",
-  "start_url": "./index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#3b82f6",

@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mzansi-Edge POS</title>
     
-    <!-- Hardened Polyfill for Environment Variables -->
+    <!-- 1. CRITICAL: Initialize process global before ANY other scripts load -->
     <script>
-      (function() {
-        window.process = window.process || { env: {} };
-        // GitHub Pages/Netlify compatibility: ensures process.env is never undefined
-        if (!window.process.env) window.process.env = {};
-      })();
+      window.process = { env: { API_KEY: "" } };
     </script>
 
-    <!-- Polyfill for Import Maps (Critical for Mobile Safari < 16.4 and older Android) -->
+    <!-- 2. Mobile Compatibility: Polyfill for Import Maps (iOS < 16.4 / Older Android) -->
     <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
     <script type="importmap">
@@ -36,7 +32,7 @@
 }
 </script>
 
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,14 +42,16 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background: #020617; /* Dark background to prevent white flash */
+            background: #020617; /* Slate-950 */
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             overflow: hidden;
+            /* Prevents pull-to-refresh and elastic bounce on mobile */
+            overscroll-behavior: none;
         }
         #root {
             height: 100%;
+            height: 100vh; /* Fallback */
             height: 100dvh;
             display: flex;
             flex-direction: column;
@@ -61,27 +59,24 @@
         @media print {
             .no-print { display: none !important; }
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.3); border-radius: 10px; }
     </style>
 </head>
 <body class="select-none">
     <div id="root"></div>
     
-    <!-- Debugging script for blank page detection -->
+    <!-- 3. Explicitly load the entry point as a module -->
+    <script type="module" src="index.tsx"></script>
+
     <script>
+      // Graceful error reporting for mobile debugging
       window.addEventListener('error', function(e) {
-        if (e.message.includes('importmap') || e.message.includes('process')) {
-          console.error('Critical initialization error:', e.message);
-        }
+        console.error('POS System Error:', e.message, 'at', e.filename, ':', e.lineno);
       });
       
-      // Relative service worker registration for GitHub Pages
+      // Relative service worker registration
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(err => console.debug('SW silent fail:', err));
+          navigator.serviceWorker.register('sw.js').catch(() => {});
         });
       }
     </script>

@@ -6,13 +6,14 @@
 
 const getSafeEnv = (key: string): string => {
   try {
-    // Check window.process first as we polyfill it in index.html
+    // Priority 1: Window polyfill (Set in index.html)
     // @ts-ignore
     if (window.process?.env?.[key]) return window.process.env[key];
-    // Check standard process if defined
+    
+    // Priority 2: Standard process global (if available via build tool)
     if (typeof process !== 'undefined' && process.env && process.env[key]) return process.env[key];
   } catch (e) {
-    // Fail silently
+    // Ignore errors
   }
   return "";
 };
@@ -20,7 +21,7 @@ const getSafeEnv = (key: string): string => {
 export const CONFIG = {
   APP: {
     NAME: "Mzansi-Edge POS",
-    VERSION: "2.4.1",
+    VERSION: "2.4.2",
     ENVIRONMENT: window.location.hostname === 'localhost' ? 'development' : 'production',
   },
   API: {
