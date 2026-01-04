@@ -4,37 +4,38 @@
  * Handles environment-specific settings and business constants.
  */
 
-// Defensive helper to avoid ReferenceError: process is not defined
-const getEnv = (key: string): string => {
+const getSafeEnv = (key: string): string => {
   try {
+    // Check window.process first as we polyfill it in index.html
     // @ts-ignore
-    return (typeof process !== 'undefined' && process.env && process.env[key]) || "";
+    if (window.process?.env?.[key]) return window.process.env[key];
+    // Check standard process if defined
+    if (typeof process !== 'undefined' && process.env && process.env[key]) return process.env[key];
   } catch (e) {
-    return "";
+    // Fail silently
   }
+  return "";
 };
 
 export const CONFIG = {
   APP: {
     NAME: "Mzansi-Edge POS",
-    VERSION: "2.4.0",
+    VERSION: "2.4.1",
     ENVIRONMENT: window.location.hostname === 'localhost' ? 'development' : 'production',
   },
   API: {
-    // Safely access the key
-    GEMINI_KEY: getEnv('API_KEY'),
-    FLASH_BASE_URL: "https://api.flash.co.za/v1", // Mock placeholder
+    GEMINI_KEY: getSafeEnv('API_KEY'),
+    FLASH_BASE_URL: "https://api.flash.co.za/v1",
     FLASH_MERCHANT_ID: "27111450216",
   },
   BUSINESS: {
     CURRENCY: "ZAR",
     CURRENCY_SYMBOL: "R",
-    TAX_RATE: 0.15, // South African VAT
+    TAX_RATE: 0.15,
   },
   STORAGE_KEYS: {
-    MAIN_STATE: 'nexus_pos_data_v2',
+    MAIN_STATE: 'mzansi_edge_pos_v2',
   }
 };
 
-export const isProduction = CONFIG.APP.ENVIRONMENT === 'production';
 export const hasGeminiKey = !!CONFIG.API.GEMINI_KEY;

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -10,7 +10,6 @@ import {
   LogOut, 
   Menu, 
   X,
-  Bell,
   Zap,
   Wifi,
   WifiOff,
@@ -60,11 +59,8 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
     };
   }, []);
 
-  // Sync Logic: Auto-print queued receipts when online
   useEffect(() => {
     if (isOnline && state.queuedReceipts.length > 0) {
-      console.log(`System Online: Printing ${state.queuedReceipts.length} queued receipts...`);
-      
       state.queuedReceipts.forEach(queued => {
         if (queued.type === 'RETAIL') {
           const sale = state.sales.find(s => s.id === queued.id);
@@ -74,8 +70,6 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           if (tx) generateFlashReceipt(tx);
         }
       });
-
-      // Clear the queue after processing
       setState(prev => ({ ...prev, queuedReceipts: [] }));
     }
   }, [isOnline, state.queuedReceipts, state.sales, state.flashTransactions, setState]);
@@ -95,17 +89,14 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden relative font-sans text-slate-900 bg-slate-950">
-      {/* Premium HD Retail Background */}
+    <div className="flex w-full h-full overflow-hidden relative font-sans text-slate-900 bg-slate-950">
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
         style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=85&w=2400")' }}
       >
-        {/* Dynamic Multi-Stage Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/60 to-slate-950/90 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] md:hidden"
@@ -113,7 +104,6 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
         ></div>
       )}
 
-      {/* Sidebar - Deep Glass Design */}
       <aside className={`bg-slate-950/40 backdrop-blur-3xl w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           <div className="p-6">
@@ -132,7 +122,7 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
               </button>
             </div>
             
-            <nav className="space-y-1.5 overflow-y-auto no-scrollbar max-h-[calc(100dvh-200px)]">
+            <nav className="space-y-1.5 overflow-y-auto no-scrollbar">
               <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Overview" active={location.pathname === '/dashboard'} onClick={closeSidebar} />
               <SidebarLink to="/pos" icon={ShoppingCart} label="POS" active={location.pathname === '/pos'} onClick={closeSidebar} />
               <SidebarLink to="/vas" icon={Zap} label="VAS / Flash" active={location.pathname === '/vas'} onClick={closeSidebar} />
@@ -162,7 +152,6 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
         </div>
       </aside>
 
-      {/* Main Content Area - Glassmorphic Surface */}
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative z-10 bg-white/70 backdrop-blur-md">
         <header className="bg-white/80 backdrop-blur-2xl border-b border-slate-200/50 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
           <div className="flex items-center gap-2 md:gap-4">
@@ -204,18 +193,17 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
           </div>
         </header>
 
-        {/* Offline Warning Banner */}
         {!isOnline && (
-          <div className="bg-amber-500 text-white px-6 py-2.5 flex items-center justify-center gap-4 animate-in slide-in-from-top duration-300 flex-shrink-0">
+          <div className="bg-amber-500 text-white px-6 py-2 flex items-center justify-center gap-4 animate-in slide-in-from-top duration-300 flex-shrink-0">
             <Database size={16} className="animate-pulse" />
             <p className="text-[10px] font-black uppercase tracking-widest text-center">
-              Register Offline: Local Data mirroring active.
+              Register Offline: Local Mirror Active.
             </p>
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 touch-pan-y">
-          <div className="max-w-[1600px] mx-auto pb-10">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 touch-pan-y h-full">
+          <div className="max-w-[1600px] mx-auto pb-10 min-h-full">
             <Routes>
               <Route path="/dashboard" element={<Dashboard state={state} />} />
               <Route path="/pos" element={<POS state={state} setState={setState} />} />
