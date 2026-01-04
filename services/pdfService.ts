@@ -38,18 +38,39 @@ export const generateReceiptPDF = (sale: Sale, items: SaleItem[]) => {
   doc.line(margin, y, 75, y);
   y += 6;
 
+  doc.setFontSize(8);
+  doc.text("SUBTOTAL", 5, y);
+  doc.text(`${CURRENCY_SYMBOL}${(sale.totalAmount - sale.taxAmount).toFixed(2)}`, 75, y, { align: 'right' });
+  y += 4;
+  doc.text(`VAT (${(TAX_RATE * 100).toFixed(0)}%)`, 5, y);
+  doc.text(`${CURRENCY_SYMBOL}${sale.taxAmount.toFixed(2)}`, 75, y, { align: 'right' });
+  y += 6;
+
   doc.setFontSize(10);
   doc.text("TOTAL", 5, y);
   doc.text(`${CURRENCY_SYMBOL}${sale.totalAmount.toFixed(2)}`, 75, y, { align: 'right' });
-  y += 15;
+  
+  // Add Payment Details (Cash Tendered and Change)
+  if (sale.paymentMethod === 'CASH' && sale.cashReceived !== undefined) {
+    y += 6;
+    doc.setFontSize(8);
+    doc.text("CASH RECEIVED", 5, y);
+    doc.text(`${CURRENCY_SYMBOL}${sale.cashReceived.toFixed(2)}`, 75, y, { align: 'right' });
+    y += 4;
+    doc.setFont("helvetica", "bold");
+    doc.text("CHANGE DUE", 5, y);
+    doc.text(`${CURRENCY_SYMBOL}${(sale.changeDue || 0).toFixed(2)}`, 75, y, { align: 'right' });
+    doc.setFont("helvetica", "normal");
+  }
 
+  y += 15;
   doc.setFontSize(8);
   doc.text("RETURN POLICY: 7 Days with receipt.", 40, y, { align: 'center' });
   doc.save(`receipt_${sale.id}.pdf`);
 };
 
 export const generateFlashReceipt = (tx: FlashTransaction) => {
-  const doc = new jsPDF({ unit: 'mm', format: [80, 150] });
+  const doc = new jsPDF({ unit: 'mm', format: [80, 180] });
   let y = 10;
 
   doc.setFontSize(14);
@@ -69,6 +90,17 @@ export const generateFlashReceipt = (tx: FlashTransaction) => {
   doc.setFontSize(12);
   doc.text(`${tx.type}: ${CURRENCY_SYMBOL}${tx.amount.toFixed(2)}`, 40, y, { align: 'center' });
   y += 12;
+
+  // Add Payment Details for Flash
+  if (tx.cashReceived !== undefined) {
+    doc.setFontSize(8);
+    doc.text(`Cash Tendered: ${CURRENCY_SYMBOL}${tx.cashReceived.toFixed(2)}`, 5, y);
+    y += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text(`Change Given: ${CURRENCY_SYMBOL}${(tx.changeDue || 0).toFixed(2)}`, 5, y);
+    doc.setFont("helvetica", "normal");
+    y += 10;
+  }
 
   if (tx.token) {
     doc.setFontSize(14);

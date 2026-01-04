@@ -44,6 +44,8 @@ export interface FlashTransaction {
   token?: string; // For Electricity or PIN vouchers
   status: 'SUCCESS' | 'FAILED' | 'PENDING';
   timestamp: number;
+  cashReceived?: number;
+  changeDue?: number;
 }
 
 export interface Customer {
@@ -73,6 +75,8 @@ export interface Sale {
   cashierId: string;
   customerId?: string;
   currency: string;
+  cashReceived?: number;
+  changeDue?: number;
 }
 
 export interface InventoryLog {

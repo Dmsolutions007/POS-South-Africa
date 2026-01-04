@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Zap, 
   Smartphone, 
@@ -13,7 +13,8 @@ import {
   ChevronRight,
   User,
   History,
-  LayoutGrid
+  LayoutGrid,
+  Coins
 } from 'lucide-react';
 import { AppState, FlashProductType, FlashTransaction } from '../types';
 import { FLASH_PROVIDERS, CURRENCY_SYMBOL } from '../constants';
@@ -25,6 +26,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
   const [selectedProvider, setSelectedProvider] = useState(FLASH_PROVIDERS[0].name);
   const [amount, setAmount] = useState("");
   const [phone, setPhone] = useState("");
+  const [cashReceived, setCashReceived] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastTx, setLastTx] = useState<FlashTransaction | null>(null);
 
@@ -34,6 +36,12 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
     });
   }, []);
 
+  const changeDue = useMemo(() => {
+    const received = parseFloat(cashReceived) || 0;
+    const price = parseFloat(amount) || 0;
+    return Math.max(0, received - price);
+  }, [cashReceived, amount]);
+
   const handleSale = async () => {
     if (!phone || !amount || parseFloat(amount) <= 0) return;
     
@@ -41,24 +49,33 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
     const result = await FlashService.processSale(activeTab, selectedProvider, parseFloat(amount), phone);
     
     if (result.success) {
+      const vAmount = parseFloat(amount);
+      const vCash = parseFloat(cashReceived) || vAmount;
+      const vChange = Math.max(0, vCash - vAmount);
+
       const newTx: FlashTransaction = {
         id: `TX-${Date.now()}`,
         reference: result.ref,
         type: activeTab,
         provider: selectedProvider,
-        amount: parseFloat(amount),
+        amount: vAmount,
         customerPhone: phone,
         token: result.token,
         status: 'SUCCESS',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        cashReceived: vCash,
+        changeDue: vChange
       };
 
       setState((prev: any) => ({
         ...prev,
         flashTransactions: [...prev.flashTransactions, newTx],
-        flashWalletBalance: prev.flashWalletBalance - parseFloat(amount)
+        flashWalletBalance: prev.flashWalletBalance - vAmount
       }));
       setLastTx(newTx);
+      setAmount("");
+      setPhone("");
+      setCashReceived("");
     } else {
       alert(result.error);
     }
@@ -67,7 +84,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
 
   return (
     <div className="space-y-6">
-      {/* Flash Header & Balance - Grid scales on mobile */}
+      {/* Flash Header & Balance */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
@@ -101,7 +118,6 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
         {/* Sales Interface */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-            {/* Horizontal Scrollable Tabs on Mobile */}
             <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar bg-slate-50/50">
               {(['AIRTIME', 'DATA', 'ELECTRICITY', 'VOUCHER'] as FlashProductType[]).map(tab => (
                 <button
@@ -133,7 +149,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Customer MSISDN</label>
                   <div className="relative">
@@ -161,11 +177,46 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cash Tendered</label>
+                  <div className="relative">
+                     <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-emerald-600 text-lg">{CURRENCY_SYMBOL}</span>
+                     <input 
+                      type="number" 
+                      placeholder="0.00"
+                      className="w-full pl-10 pr-4 py-4 bg-emerald-50/50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-black text-slate-900 text-2xl shadow-inner"
+                      value={cashReceived}
+                      onChange={(e) => setCashReceived(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
+
+              {/* Change Calculator Row */}
+              {parseFloat(cashReceived) > 0 && (
+                <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-900 flex items-center justify-between animate-in zoom-in-95 duration-300">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Coins size={14} className="text-emerald-500" />
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Customer Change Due</p>
+                    </div>
+                    <p className="text-4xl font-black text-emerald-500 leading-none">
+                      {CURRENCY_SYMBOL}{changeDue.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Status</p>
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${parseFloat(cashReceived) >= parseFloat(amount) ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                      {parseFloat(cashReceived) >= parseFloat(amount) ? 'Sufficient Cash' : 'Insufficient Cash'}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <button 
                 onClick={handleSale}
-                disabled={isProcessing || !amount || !phone}
+                disabled={isProcessing || !amount || !phone || (parseFloat(cashReceived) > 0 && parseFloat(cashReceived) < parseFloat(amount))}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white font-black py-6 rounded-3xl shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-sm active:scale-95"
               >
                 {isProcessing ? (
@@ -232,7 +283,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
         </div>
       </div>
 
-      {/* Success Receipt Overlay - Enhanced design */}
+      {/* Success Receipt Overlay */}
       {lastTx && (
         <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
@@ -246,7 +297,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
             {lastTx.token && (
               <div className="bg-slate-950 p-6 rounded-3xl mb-8 border border-slate-800 shadow-inner group">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Voucher PIN / Token</p>
-                <p className="text-2xl font-mono font-black text-blue-400 tracking-widest break-all group-hover:scale-110 transition-transform">
+                <p className="text-2xl font-mono font-black text-blue-400 tracking-widest group-hover:scale-110 transition-transform">
                   {lastTx.token}
                 </p>
               </div>
