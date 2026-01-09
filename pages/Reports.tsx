@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -11,12 +11,14 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { FileDown, Calendar, ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Package } from 'lucide-react';
+import { FileDown, Calendar, ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Package, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { AppState } from '../types.ts';
 import { CURRENCY_SYMBOL, COLORS } from '../constants.tsx';
 import { exportToExcel } from '../services/excelService.ts';
 
 const Reports = ({ state }: { state: AppState }) => {
+  const [showZReport, setShowZReport] = useState(false);
+
   const chartData = useMemo(() => {
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
@@ -42,6 +44,15 @@ const Reports = ({ state }: { state: AppState }) => {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [state.products]);
 
+  const dailyStats = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todaySales = state.sales.filter(s => new Date(s.timestamp).toISOString().split('T')[0] === todayStr);
+    const revenue = todaySales.reduce((acc, s) => acc + s.totalAmount, 0);
+    const cash = todaySales.filter(s => s.paymentMethod === 'CASH').reduce((acc, s) => acc + s.totalAmount, 0);
+    const card = todaySales.filter(s => s.paymentMethod === 'CARD').reduce((acc, s) => acc + s.totalAmount, 0);
+    return { count: todaySales.length, revenue, cash, card };
+  }, [state.sales]);
+
   const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   const inventoryValue = useMemo(() => 
@@ -59,13 +70,22 @@ const Reports = ({ state }: { state: AppState }) => {
           <Calendar size={20} className="text-blue-600" />
           <span className="text-xs md:text-sm font-black uppercase tracking-widest">Period: Last 7 Days</span>
         </div>
-        <button 
-          onClick={() => exportToExcel(state)}
-          className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
-        >
-          <FileDown size={18} />
-          <span>Export Master Data</span>
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setShowZReport(true)}
+            className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-slate-800 transition-all shadow-lg active:scale-95"
+          >
+            <ShieldAlert size={18} />
+            <span>Generate Z-Report</span>
+          </button>
+          <button 
+            onClick={() => exportToExcel(state)}
+            className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+          >
+            <FileDown size={18} />
+            <span>Export Data</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -137,45 +157,40 @@ const Reports = ({ state }: { state: AppState }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Operational Health</h3>
-          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">Audited Stats</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
-          <div className="p-8 group hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><TrendingUp size={16} /></div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Volume</p>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">{state.sales.length}</span>
-              <span className="text-emerald-500 text-xs font-black flex items-center">
-                <ArrowUpRight size={14} className="mr-1" /> 4.2%
-              </span>
-            </div>
-          </div>
-          <div className="p-8 group hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><DollarSign size={16} /></div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg Ticket Size</p>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">{CURRENCY_SYMBOL}{avgOrderValue.toFixed(2)}</span>
-            </div>
-          </div>
-          <div className="p-8 group hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><Package size={16} /></div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset Value (Cost)</p>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">{CURRENCY_SYMBOL}{inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              <span className="text-slate-400 text-[10px] font-bold uppercase">Net</span>
-            </div>
+      {/* End of Day Modal */}
+      {showZReport && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl animate-in zoom-in-95">
+             <div className="text-center mb-6">
+               <CheckCircle2 size={48} className="text-emerald-500 mx-auto mb-3" />
+               <h3 className="text-xl font-black uppercase tracking-widest">Z-Report Generated</h3>
+               <p className="text-[10px] font-bold text-slate-400 uppercase">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
+             </div>
+             <div className="space-y-4 border-y border-slate-100 py-6">
+                <div className="flex justify-between font-black text-xs uppercase tracking-widest">
+                  <span className="text-slate-400">Total Sales</span>
+                  <span>{dailyStats.count}</span>
+                </div>
+                <div className="flex justify-between font-black text-xs uppercase tracking-widest">
+                  <span className="text-slate-400">Cash in Drawer</span>
+                  <span className="text-emerald-600">{CURRENCY_SYMBOL}{dailyStats.cash.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-black text-xs uppercase tracking-widest">
+                  <span className="text-slate-400">Card Total</span>
+                  <span className="text-blue-600">{CURRENCY_SYMBOL}{dailyStats.card.toFixed(2)}</span>
+                </div>
+                <div className="pt-2 border-t border-slate-100 flex justify-between font-black text-lg">
+                  <span className="italic">GROSS</span>
+                  <span>{CURRENCY_SYMBOL}{dailyStats.revenue.toFixed(2)}</span>
+                </div>
+             </div>
+             <div className="mt-8 flex gap-3">
+               <button onClick={() => setShowZReport(false)} className="flex-1 py-4 font-black text-[10px] uppercase text-slate-400 hover:bg-slate-50 rounded-xl">Dismiss</button>
+               <button onClick={() => { window.print(); setShowZReport(false); }} className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest">Print Z-Report</button>
+             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

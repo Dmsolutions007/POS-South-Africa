@@ -3,35 +3,30 @@ import { Product, Sale } from "../types.ts";
 import { CONFIG, hasGeminiKey } from "./config.ts";
 
 export const getBusinessInsights = async (products: Product[], sales: Sale[]) => {
-  // Graceful exit if hosting environment lacks the API key
   if (!hasGeminiKey) {
-    console.warn("Gemini AI: API key is not configured in this environment.");
-    return "AI Insights are currently unavailable (Missing API Key).";
+    return "AI Insights Unavailable: Missing API Key.";
   }
 
   try {
     const ai = new GoogleGenAI({ apiKey: CONFIG.API.GEMINI_KEY });
     
     const dataSummary = {
-      totalProducts: products.length,
-      lowStockCount: products.filter(p => p.stock <= p.lowStockThreshold).length,
-      totalSales: sales.length,
-      revenue: sales.reduce((acc, s) => acc + s.totalAmount, 0),
+      inventory: products.map(p => ({ name: p.name, stock: p.stock, threshold: p.lowStockThreshold })),
+      salesTotal: sales.reduce((acc, s) => acc + s.totalAmount, 0),
+      salesCount: sales.length,
+      recentItems: sales.slice(-3).flatMap(s => s.items.map(i => i.productName))
     };
-
-    const prompt = `Act as a business consultant for a retail store in South Africa. 
-    Analyze the following data summary and provide 3 short, actionable insights:
-    Data: ${JSON.stringify(dataSummary)}
-    Return the response as a simple list.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: prompt,
+      contents: `Analyze this South African retail POS data: ${JSON.stringify(dataSummary)}. 
+      Provide 3 professional, short business strategy insights. 
+      Format: Short bullet points. Use South African context (ZAR).`,
     });
 
-    return response.text || "No insights found for the current data set.";
+    return response.text || "Insights engine standby.";
   } catch (error) {
-    console.error("Gemini Hosting Error:", error);
-    return "The intelligence engine is currently warming up. Please check back shortly.";
+    console.error("Gemini Error:", error);
+    return "The AI consultant is analyzing current market trends. Check back shortly.";
   }
 };

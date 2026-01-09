@@ -13,7 +13,10 @@ import {
   Wifi,
   WifiOff,
   Database,
-  Printer
+  Printer,
+  CreditCard,
+  MessageCircle,
+  ExternalLink
 } from 'lucide-react';
 import { loadState, saveState, authenticate } from './store.ts';
 import { AppState } from './types.ts';
@@ -28,6 +31,37 @@ import Customers from './pages/Customers.tsx';
 import Reports from './pages/Reports.tsx';
 import LoginPage from './pages/LoginPage.tsx';
 import FlashServices from './pages/FlashServices.tsx';
+
+const SaleBanner = () => (
+  <div className="bg-gradient-to-r from-blue-700 via-indigo-800 to-blue-700 text-white px-4 py-2 flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-6 z-[100] border-b border-white/10 shadow-lg">
+    <div className="flex items-center gap-2">
+      <div className="p-1 bg-white/20 rounded animate-pulse">
+        <Zap size={14} fill="currentColor" />
+      </div>
+      <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.15em] whitespace-nowrap">
+        Enterprise POS Source Code & License for Sale
+      </span>
+    </div>
+    <div className="flex items-center gap-2">
+      <a 
+        href="https://paypal.me/mdsolutions007" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex items-center gap-1.5 px-3 py-1 bg-white text-blue-800 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider hover:bg-blue-50 transition-all shadow-md active:scale-95"
+      >
+        <CreditCard size={12} /> Buy It Now
+      </a>
+      <a 
+        href="https://wa.me/27658456336?text=I%20am%20interested%20in%20buying%20the%20Mzansi-Edge%20POS%20System" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider hover:bg-emerald-600 transition-all shadow-md active:scale-95"
+      >
+        <MessageCircle size={12} /> WhatsApp
+      </a>
+    </div>
+  </div>
+);
 
 const SidebarLink = ({ to, icon: Icon, label, active, onClick }: { to: string, icon: any, label: string, active: boolean, onClick?: () => void }) => (
   <Link 
@@ -88,133 +122,137 @@ const AppLayout = ({ state, setState, logout }: { state: AppState, setState: Rea
   };
 
   return (
-    <div className="flex w-full h-full overflow-hidden relative font-sans text-slate-900 bg-slate-950">
-      <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
-        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=85&w=2400")' }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/60 to-slate-950/90 backdrop-blur-[2px]"></div>
-      </div>
-
-      {isSidebarOpen && (
+    <div className="flex flex-col w-full h-full overflow-hidden relative font-sans text-slate-900 bg-slate-950">
+      <SaleBanner />
+      
+      <div className="flex flex-1 overflow-hidden relative">
         <div 
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] md:hidden"
-          onClick={closeSidebar}
-        ></div>
-      )}
-
-      <aside className={`bg-slate-950/40 backdrop-blur-3xl w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <div className="flex flex-col h-full">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
-                  <Zap size={24} fill="white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-black text-white tracking-tight leading-none">Mzansi-Edge</h1>
-                  <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest text-nowrap">v{CONFIG.APP.VERSION}</span>
-                </div>
-              </div>
-              <button onClick={closeSidebar} className="md:hidden text-slate-400 hover:text-white">
-                <X size={24} />
-              </button>
-            </div>
-            
-            <nav className="space-y-1.5 overflow-y-auto no-scrollbar">
-              <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Overview" active={location.pathname === '/dashboard'} onClick={closeSidebar} />
-              <SidebarLink to="/pos" icon={ShoppingCart} label="POS" active={location.pathname === '/pos'} onClick={closeSidebar} />
-              <SidebarLink to="/vas" icon={Zap} label="VAS / Flash" active={location.pathname === '/vas'} onClick={closeSidebar} />
-              <SidebarLink to="/products" icon={Package} label="Inventory" active={location.pathname === '/products'} onClick={closeSidebar} />
-              <SidebarLink to="/customers" icon={Users} label="Customers" active={location.pathname === '/customers'} onClick={closeSidebar} />
-              <SidebarLink to="/reports" icon={BarChart3} label="Analytics" active={location.pathname === '/reports'} onClick={closeSidebar} />
-            </nav>
-          </div>
-
-          <div className="mt-auto p-6 space-y-4">
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10 backdrop-blur-xl">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-bold text-slate-300 uppercase">System Status</p>
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-50 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-amber-500 animate-pulse'}`}></div>
-              </div>
-              <p className="text-[10px] text-slate-400 font-medium leading-tight">{isOnline ? 'Synced with cloud.' : 'Local mirror active.'}</p>
-            </div>
-            
-            <button 
-              onClick={logout}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-all font-bold text-sm"
-            >
-              <LogOut size={18} />
-              <span>Lock Terminal</span>
-            </button>
-          </div>
+          className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=85&w=2400")' }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/60 to-slate-950/90 backdrop-blur-[2px]"></div>
         </div>
-      </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative z-10 bg-white/70 backdrop-blur-md">
-        <header className="bg-white/80 backdrop-blur-2xl border-b border-slate-200/50 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
-          <div className="flex items-center gap-2 md:gap-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors">
-              <Menu size={20} />
-            </button>
-            <h2 className="text-[10px] md:text-sm font-bold text-slate-900 uppercase tracking-widest truncate">
-              {getPageTitle(location.pathname)}
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-2 md:gap-4">
-            {state.queuedReceipts.length > 0 && (
-               <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 animate-bounce">
-                 <Printer size={12} />
-                 <span className="text-[9px] font-black uppercase tracking-widest">{state.queuedReceipts.length} Queued</span>
-               </div>
-            )}
-
-            <div className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter transition-all ${isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm' : 'bg-red-50 text-red-600 border border-red-100 animate-pulse'}`}>
-              {isOnline ? (
-                <><Wifi size={10} className="hidden sm:inline" /><span>Online</span></>
-              ) : (
-                <><WifiOff size={10} className="hidden sm:inline" /><span>Offline</span></>
-              )}
-            </div>
-            
-            <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-            
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="text-right hidden lg:block">
-                <p className="text-xs font-bold text-slate-900">{state.currentUser?.fullName}</p>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">{state.currentUser?.role}</p>
-              </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white font-bold">
-                {state.currentUser?.fullName.charAt(0)}
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {!isOnline && (
-          <div className="bg-amber-500 text-white px-6 py-2 flex items-center justify-center gap-4 animate-in slide-in-from-top duration-300 flex-shrink-0">
-            <Database size={16} className="animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-center">
-              Register Offline: Local Mirror Active.
-            </p>
-          </div>
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] md:hidden"
+            onClick={closeSidebar}
+          ></div>
         )}
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 touch-pan-y h-full">
-          <div className="max-w-[1600px] mx-auto pb-10 min-h-full">
-            <Routes>
-              <Route path="/dashboard" element={<Dashboard state={state} />} />
-              <Route path="/pos" element={<POS state={state} setState={setState} />} />
-              <Route path="/vas" element={<FlashServices state={state} setState={setState} />} />
-              <Route path="/products" element={<Products state={state} setState={setState} />} />
-              <Route path="/customers" element={<Customers state={state} setState={setState} />} />
-              <Route path="/reports" element={<Reports state={state} />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
+        <aside className={`bg-slate-950/40 backdrop-blur-3xl w-64 flex-shrink-0 transition-transform duration-300 ease-in-out fixed md:static h-full z-[70] border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          <div className="flex flex-col h-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
+                    <Zap size={24} fill="white" />
+                  </div>
+                  <div>
+                    <h1 className="text-lg font-black text-white tracking-tight leading-none">Mzansi-Edge</h1>
+                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest text-nowrap">v{CONFIG.APP.VERSION}</span>
+                  </div>
+                </div>
+                <button onClick={closeSidebar} className="md:hidden text-slate-400 hover:text-white">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <nav className="space-y-1.5 overflow-y-auto no-scrollbar">
+                <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Overview" active={location.pathname === '/dashboard'} onClick={closeSidebar} />
+                <SidebarLink to="/pos" icon={ShoppingCart} label="POS" active={location.pathname === '/pos'} onClick={closeSidebar} />
+                <SidebarLink to="/vas" icon={Zap} label="VAS / Flash" active={location.pathname === '/vas'} onClick={closeSidebar} />
+                <SidebarLink to="/products" icon={Package} label="Inventory" active={location.pathname === '/products'} onClick={closeSidebar} />
+                <SidebarLink to="/customers" icon={Users} label="Customers" active={location.pathname === '/customers'} onClick={closeSidebar} />
+                <SidebarLink to="/reports" icon={BarChart3} label="Analytics" active={location.pathname === '/reports'} onClick={closeSidebar} />
+              </nav>
+            </div>
+
+            <div className="mt-auto p-6 space-y-4">
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/10 backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-bold text-slate-300 uppercase">System Status</p>
+                  <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-50 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-amber-500 animate-pulse'}`}></div>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium leading-tight">{isOnline ? 'Synced with cloud.' : 'Local mirror active.'}</p>
+              </div>
+              
+              <button 
+                onClick={logout}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-all font-bold text-sm"
+              >
+                <LogOut size={18} />
+                <span>Lock Terminal</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </main>
+        </aside>
+
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative z-10 bg-white/70 backdrop-blur-md">
+          <header className="bg-white/80 backdrop-blur-2xl border-b border-slate-200/50 h-16 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-40">
+            <div className="flex items-center gap-2 md:gap-4">
+              <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors">
+                <Menu size={20} />
+              </button>
+              <h2 className="text-[10px] md:text-sm font-bold text-slate-900 uppercase tracking-widest truncate">
+                {getPageTitle(location.pathname)}
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-2 md:gap-4">
+              {state.queuedReceipts.length > 0 && (
+                 <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 animate-bounce">
+                   <Printer size={12} />
+                   <span className="text-[9px] font-black uppercase tracking-widest">{state.queuedReceipts.length} Queued</span>
+                 </div>
+              )}
+
+              <div className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter transition-all ${isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm' : 'bg-red-50 text-red-600 border border-red-100 animate-pulse'}`}>
+                {isOnline ? (
+                  <><Wifi size={10} className="hidden sm:inline" /><span>Online</span></>
+                ) : (
+                  <><WifiOff size={10} className="hidden sm:inline" /><span>Offline</span></>
+                )}
+              </div>
+              
+              <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
+              
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="text-right hidden lg:block">
+                  <p className="text-xs font-bold text-slate-900">{state.currentUser?.fullName}</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold">{state.currentUser?.role}</p>
+                </div>
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white font-bold">
+                  {state.currentUser?.fullName.charAt(0)}
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {!isOnline && (
+            <div className="bg-amber-500 text-white px-6 py-2 flex items-center justify-center gap-4 animate-in slide-in-from-top duration-300 flex-shrink-0">
+              <Database size={16} className="animate-pulse" />
+              <p className="text-[10px] font-black uppercase tracking-widest text-center">
+                Register Offline: Local Mirror Active.
+              </p>
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 touch-pan-y h-full">
+            <div className="max-w-[1600px] mx-auto pb-10 min-h-full">
+              <Routes>
+                <Route path="/dashboard" element={<Dashboard state={state} />} />
+                <Route path="/pos" element={<POS state={state} setState={setState} />} />
+                <Route path="/vas" element={<FlashServices state={state} setState={setState} />} />
+                <Route path="/products" element={<Products state={state} setState={setState} />} />
+                <Route path="/customers" element={<Customers state={state} setState={setState} />} />
+                <Route path="/reports" element={<Reports state={state} />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
@@ -238,7 +276,12 @@ const App = () => {
   };
 
   if (!state.currentUser) {
-    return <LoginPage onLogin={login} />;
+    return (
+      <div className="flex flex-col h-screen overflow-hidden">
+        <SaleBanner />
+        <LoginPage onLogin={login} />
+      </div>
+    );
   }
 
   return (

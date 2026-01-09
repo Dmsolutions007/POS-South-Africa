@@ -22,7 +22,7 @@ import { FLASH_PROVIDERS, CURRENCY_SYMBOL } from '../constants.tsx';
 import { FlashService } from '../services/flashService.ts';
 import { generateFlashReceipt } from '../services/pdfService.ts';
 
-const FlashServices = ({ state, setState }: { state: AppState, setState: React.Dispatch<any> }) => {
+const FlashServices = ({ state, setState }: { state: AppState, setState: React.Dispatch<React.SetStateAction<AppState>> }) => {
   const [activeTab, setActiveTab] = useState<FlashProductType>('AIRTIME');
   const [selectedProvider, setSelectedProvider] = useState(FLASH_PROVIDERS[0].name);
   const [amount, setAmount] = useState("");
@@ -35,7 +35,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
 
   useEffect(() => {
     FlashService.checkBalance().then(bal => {
-      setState((prev: any) => ({ ...prev, flashWalletBalance: bal }));
+      setState((prev) => ({ ...prev, flashWalletBalance: bal }));
     });
   }, []);
 
@@ -75,7 +75,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
       setIsOfflineTx(isOffline);
       setIsQueued(isOffline);
 
-      setState((prev: any) => ({
+      setState((prev) => ({
         ...prev,
         flashTransactions: [...prev.flashTransactions, newTx],
         flashWalletBalance: prev.flashWalletBalance - vAmount,
@@ -97,13 +97,13 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
     const currentlyQueued = state.queuedReceipts.some(q => q.id === lastTx.id);
     
     if (currentlyQueued) {
-       setState((prev: any) => ({
+       setState((prev) => ({
          ...prev,
-         queuedReceipts: prev.queuedReceipts.filter((q: any) => q.id !== lastTx.id)
+         queuedReceipts: prev.queuedReceipts.filter((q) => q.id !== lastTx.id)
        }));
        setIsQueued(false);
     } else {
-      setState((prev: any) => ({
+      setState((prev) => ({
         ...prev,
         queuedReceipts: [...prev.queuedReceipts, { type: 'FLASH', id: lastTx.id }]
       }));
@@ -124,7 +124,7 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
             </h2>
           </div>
           <button 
-            onClick={() => FlashService.checkBalance().then(b => setState((p:any)=>({...p, flashWalletBalance: b})))}
+            onClick={() => FlashService.checkBalance().then(b => setState(p=>({...p, flashWalletBalance: b})))}
             className="relative z-10 p-4 bg-slate-900 text-white rounded-2xl hover:bg-blue-600 transition-all shadow-lg active:scale-90"
           >
             <RefreshCw size={24} className={isProcessing ? 'animate-spin' : ''} />
@@ -144,7 +144,6 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sales Interface */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar bg-slate-50/50">
@@ -161,7 +160,6 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
             </div>
 
             <div className="p-6 md:p-10 space-y-8">
-              {/* Provider Selection Grid */}
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4">
                 {FLASH_PROVIDERS.map(p => (
                   <button
@@ -222,7 +220,6 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
                 </div>
               </div>
 
-              {/* Change Calculator Row */}
               {parseFloat(cashReceived) > 0 && (
                 <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-900 flex items-center justify-between animate-in zoom-in-95 duration-300">
                   <div>
@@ -261,7 +258,6 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
           </div>
         </div>
 
-        {/* Recent History Sidebar */}
         <div className="space-y-6">
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
             <div className="flex items-center justify-between mb-6">
@@ -312,7 +308,6 @@ const FlashServices = ({ state, setState }: { state: AppState, setState: React.D
         </div>
       </div>
 
-      {/* Success Receipt Overlay */}
       {lastTx && (
         <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
